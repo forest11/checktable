@@ -48,8 +48,8 @@ func createSQL(sDb, dDb *TableInfo) error {
 			return fmt.Errorf("source table(%s) has no data: list: %v", sDb.tableName, deleteList)
 		}
 	}
-	if len(insertList) > 0 && len(insertList) < 10000 {
-		if config.AppConf.Dump {
+	if len(insertList) > 0  {
+		if config.AppConf.Dump && len(insertList) < 10000 {
 			getData(insertList, sDb)
 		} else {
 			return fmt.Errorf("dest table(%s) has no data: list: %v", dDb.tableName, insertList)

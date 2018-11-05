@@ -78,7 +78,7 @@ func run(ctx context.Context) {
 
 	schemaIsOk, err := DiffTableSchema(sTB, dTB)
 	if err != nil || !schemaIsOk {
-		panic(fmt.Errorf("filed is diff, err: %s", err))
+		panic(fmt.Errorf("%s.%s filed is diff, err: %s", sTB.dbName, sTB.tableName, err))
 	}
 
 	pk, err := dbutil.GetPKName(sTB.db, sTB.dbName, sTB.tableName)
@@ -90,12 +90,12 @@ func run(ctx context.Context) {
 
 	sChunkCount, err := sTB.GetChunkCount()
 	if err != nil {
-		logs.Error("count chunk err:%v", err)
+		logs.Error("%s.%s count chunk err:%v", sTB.dbName, sTB.tableName, err)
 	}
 
 	dChunkCount, err := dTB.GetChunkCount()
 	if err != nil {
-		logs.Error("count chunk err:%v", err)
+		logs.Error("%s.%s count chunk err:%v", sTB.dbName, sTB.tableName, err)
 	}
 
 	chunkCount := getMax(sChunkCount, dChunkCount)
