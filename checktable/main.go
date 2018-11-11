@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,14 +17,26 @@ import (
 	"github.com/forest11/checktable/log"
 )
 
+type pkList struct {
+	pk []string
+	rw sync.RWMutex
+}
+
 var (
 	chunkSize   int
 	threads     int
 	isAutoIncPk bool
-	insertList  []string
-	updateList  []string
-	deleteList  []string
+	insertList  pkList
+	updateList  pkList
+	deleteList  pkList
 )
+
+// NewpKList 初始化对象
+func NewpKList() pkList {
+	return pkList{
+		pk: make([]string, 0, 1000),
+	}
+}
 
 func main() {
 	var confFile = flag.String("f", "checksum.conf", "checktable conf")
@@ -56,9 +69,9 @@ func main() {
 }
 
 func run(ctx context.Context) {
-	insertList = make([]string, 0, 1000)
-	updateList = make([]string, 0, 1000)
-	deleteList = make([]string, 0, 1000)
+	insertList = NewpKList()
+	updateList = NewpKList()
+	deleteList = NewpKList()
 	sTB := NewTableInfo(config.AppConf.SourceDB.DBName, config.AppConf.SourceDB.TableName, config.AppConf.FilterFiled, config.AppConf.WhereFiled)
 	dTB := NewTableInfo(config.AppConf.DestDB.DBName, config.AppConf.DestDB.TableName, config.AppConf.FilterFiled, config.AppConf.WhereFiled)
 

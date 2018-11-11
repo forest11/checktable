@@ -38,29 +38,32 @@ func getData(list []string, db *TableInfo) {
 
 //生成sql语句
 func createSQL(sDb, dDb *TableInfo) error {
-	if len(deleteList) > 0 {
+	if len(deleteList.pk) > 0 {
 		if config.AppConf.Dump {
-			for _, v := range deleteList {
+			for _, v := range deleteList.pk {
 				delSQL := fmt.Sprintf("delete from %s where %s=%v;\n", dDb.tableName, dDb.pkName, v)
 				writeFile(config.AppConf.DumpFile, delSQL)
 			}
 		} else {
-			return fmt.Errorf("source table(%s) has no data: list: %v", sDb.tableName, deleteList)
+			return fmt.Errorf("source table(%s) has no data: list: %v", sDb.tableName, deleteList.pk)
 		}
 	}
-	if len(insertList) > 0  {
-		if config.AppConf.Dump && len(insertList) < 10000 {
-			getData(insertList, sDb)
+
+	if len(insertList.pk) > 0 {
+		if config.AppConf.Dump && len(insertList.pk) < 10000 {
+			getData(insertList.pk, sDb)
 		} else {
-			return fmt.Errorf("dest table(%s) has no data: list: %v", dDb.tableName, insertList)
+			return fmt.Errorf("dest table(%s) has no data: list: %v", dDb.tableName, insertList.pk)
 		}
 	}
-	if len(updateList) > 0 {
-		if config.AppConf.Dump && len(updateList) < 10000 {
-			getData(updateList, sDb)
+
+	if len(updateList.pk) > 0 {
+		if config.AppConf.Dump && len(updateList.pk) < 10000 {
+			getData(updateList.pk, sDb)
 		} else {
-			return fmt.Errorf("table(%s) field data is diff: list: %v", dDb.tableName, updateList)
+			return fmt.Errorf("table(%s) field data is diff: list: %v", dDb.tableName, updateList.pk)
 		}
 	}
+
 	return nil
 }

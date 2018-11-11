@@ -98,9 +98,21 @@ func DiffRowData(stbInfo, dtbInfo *TableInfo, chunk chunkInfo) error {
 	logs.Debug("dest row data: %v", d)
 
 	sNoKey, dNoKey, diffValueKey := diffMap(s, d)
-	insertList = append(insertList, dNoKey...)
-	deleteList = append(deleteList, sNoKey...)
-	updateList = append(updateList, diffValueKey...)
+	if len(dNoKey) > 0 {
+		insertList.rw.Lock()
+		insertList.pk = append(insertList.pk, dNoKey...)
+		insertList.rw.Unlock()
+	}
+	if len(sNoKey) > 0 {
+		deleteList.rw.Lock()
+		deleteList.pk = append(deleteList.pk, sNoKey...)
+		deleteList.rw.Unlock()
+	}
+	if len(diffValueKey) > 0 {
+		updateList.rw.Lock()
+		updateList.pk = append(updateList.pk, diffValueKey...)
+		updateList.rw.Unlock()
+	}
 	logs.Debug("insertList: %v\n, deleteList:%v, updateList:%v", insertList, deleteList, updateList)
 	return nil
 }
