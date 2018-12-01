@@ -91,7 +91,7 @@ func goDiffChunk(stbInfo, dtbInfo *TableInfo, chunkChan chan chunkInfo, wg *sync
 }
 
 // 非自增主键表分割chunk
-func splitTableToChunkForRandomPk(stb, dtb *TableInfo, start, end int) ([]chunkInfo, error) {
+func splitTableToChunkForRandomPk(stb, dtb *TableInfo, start, end int) (*[]chunkInfo, error) {
 	var chunks []chunkInfo
 	offset := start
 	for offset < end {
@@ -113,21 +113,21 @@ func splitTableToChunkForRandomPk(stb, dtb *TableInfo, start, end int) ([]chunkI
 		chunks = append(chunks, newChunkInfo(end, offset))
 	}
 	logs.Debug("chunks: %#v", chunks)
-	return chunks, nil
+	return &chunks, nil
 }
 
 // 自增主键分割表
-func splitTableToChunkForAutoPk(stb, dtb *TableInfo, start, end int) ([]chunkInfo, error) {
+func splitTableToChunkForAutoPk(stb, dtb *TableInfo, start, end int) (*[]chunkInfo, error) {
 	var chunks []chunkInfo
 	for offset := start; offset < end; offset += chunkSize {
 		n := newChunkInfo(offset, offset+chunkSize)
 		chunks = append(chunks, n)
 	}
 	logs.Debug("chunks: %#v", chunks)
-	return chunks, nil
+	return &chunks, nil
 }
 
-func splitTableToChunk(stb, dtb *TableInfo, start, end int) (chunks []chunkInfo, err error) {
+func splitTableToChunk(stb, dtb *TableInfo, start, end int) (chunks *[]chunkInfo, err error) {
 	if isAutoIncPk {
 		chunks, err = splitTableToChunkForAutoPk(stb, dtb, start, end)
 	} else {
@@ -151,7 +151,7 @@ func diffChunk(ctx context.Context, stbInfo, dtbInfo *TableInfo, min, max int) {
 		go goDiffChunk(stbInfo, dtbInfo, chunkChan, wg)
 	}
 
-	for _, chunk := range chunkList {
+	for _, chunk := range *chunkList {
 		select {
 		case <-ctx.Done():
 			logs.Info("exit...")

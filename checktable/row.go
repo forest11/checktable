@@ -113,6 +113,6 @@ func DiffRowData(stbInfo, dtbInfo *TableInfo, chunk chunkInfo) error {
 		updateList.pk = append(updateList.pk, diffValueKey...)
 		updateList.rw.Unlock()
 	}
-	logs.Debug("insertList: %v\n, deleteList:%v, updateList:%v", insertList, deleteList, updateList)
+	logs.Debug("insertList: %v\n, deleteList:%v, updateList:%v", insertList.pk, deleteList.pk, updateList.pk)
 	return nil
 }
